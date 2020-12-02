@@ -9,20 +9,38 @@ import {
     Visibility,
 } from './umlClass'
 
-export const dotUmlClass = (umlClass: UmlClass): string => {
+export interface ClassOptions {
+    hideAttributes?: boolean
+    hideOperators?: boolean
+    hideStructs?: boolean
+    hideEnums?: boolean
+}
+
+export const dotUmlClass = (
+    umlClass: UmlClass,
+    options: ClassOptions = {}
+): string => {
     let dotString = `\n${umlClass.id} [label="{${dotClassTitle(umlClass)}`
 
     // Add attributes
-    dotString += dotAttributeVisibilities(umlClass)
+    if (!options.hideAttributes) {
+        dotString += dotAttributeVisibilities(umlClass)
+    }
 
     // Add operators
-    dotString += dotOperatoreVisibilities(umlClass)
+    if (!options.hideOperators) {
+        dotString += dotOperatorVisibilities(umlClass)
+    }
 
     dotString += '}"]'
 
     // Output structs and enums
-    dotString += dotStructs(umlClass)
-    dotString += dotEnums(umlClass)
+    if (!options.hideStructs) {
+        dotString += dotStructs(umlClass)
+    }
+    if (!options.hideEnums) {
+        dotString += dotEnums(umlClass)
+    }
 
     return dotString
 }
@@ -104,7 +122,7 @@ const dotAttributes = (vizGroup: string, attributes: Attribute[]): string => {
     return dotString
 }
 
-const dotOperatoreVisibilities = (umlClass: UmlClass): string => {
+const dotOperatorVisibilities = (umlClass: UmlClass): string => {
     let dotString = '| '
 
     // For each visibility group

@@ -48,6 +48,13 @@ If an Ethereum address with a 0x prefix is passed, the verified source code from
         'mainnet, ropsten, kovan, rinkeby or goerli',
         'mainnet'
     )
+    .option('-a, --hideAttributes', 'hide class and interface attributes')
+    .option(
+        '-p, --hideOperators',
+        'hide class and interface operators/functions'
+    )
+    .option('-e, --hideEnums', 'hide enum types')
+    .option('-s, --hideStructs ', 'hide data structures')
     .option('-k, --etherscanApiKey <key>', 'Etherscan API Key')
     .option('-c, --clusterFolders', 'cluster contracts into source folders')
     .option('-v, --verbose', 'run with debugging statements')
@@ -116,7 +123,13 @@ async function sol2uml() {
         fileFolderAddress,
         program.outputFormat,
         program.outputFileName,
-        program.clusterFolders
+        program.clusterFolders,
+        {
+            hideAttributes: program.hideAttributes,
+            hideOperators: program.hideOperators,
+            hideEnums: program.hideEnums,
+            hideStructs: program.hideStructs,
+        }
     ).then(() => {
         debug(`Finished`)
     })

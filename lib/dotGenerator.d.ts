@@ -1,2 +1,8 @@
 import { UmlClass } from './umlClass';
-export declare const dotUmlClass: (umlClass: UmlClass) => string;
+export interface ClassOptions {
+    hideAttributes?: boolean;
+    hideOperators?: boolean;
+    hideStructs?: boolean;
+    hideEnums?: boolean;
+}
+export declare const dotUmlClass: (umlClass: UmlClass, options?: ClassOptions) => string;

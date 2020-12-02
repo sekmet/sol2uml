@@ -1,4 +1,4 @@
-import { dotUmlClass } from './dotGenerator'
+import { ClassOptions, dotUmlClass } from './dotGenerator'
 
 const debug = require('debug')('sol2uml')
 
@@ -22,9 +22,10 @@ export const generateFilesFromUmlClasses = async (
     outputBaseName: string,
     outputFormat: OutputFormats = 'svg',
     outputFilename?: string,
-    clusterFolders: boolean = false
+    clusterFolders: boolean = false,
+    classOptions: ClassOptions = {}
 ): Promise<void> => {
-    const dot = convertUmlClasses2Dot(umlClasses, clusterFolders)
+    const dot = convertUmlClasses2Dot(umlClasses, clusterFolders, classOptions)
 
     if (outputFormat === 'dot' || outputFormat === 'all') {
         writeDot(dot, outputFilename)
@@ -72,7 +73,8 @@ export const convertUmlClassesToSvg = async (
 
 export function convertUmlClasses2Dot(
     umlClasses: UmlClass[],
-    clusterFolders: boolean = false
+    clusterFolders: boolean = false,
+    classOptions: ClassOptions = {}
 ): string {
     let dotString: string = `
 digraph UmlClassDiagram {
@@ -100,7 +102,7 @@ label="${umlClass.codeSource}"`
 
             sourceFolder = umlClass.codeSource
         }
-        dotString += dotUmlClass(umlClass)
+        dotString += dotUmlClass(umlClass, classOptions)
     }
 
     // Need to close off the last subgraph if not the first

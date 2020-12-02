@@ -1,5 +1,5 @@
 import { lstatSync, readFileSync } from 'fs'
-import {dirname, extname, relative} from 'path'
+import {basename, dirname, extname, relative} from 'path'
 import klaw from 'klaw'
 import { ASTNode, parse } from '@solidity-parser/parser'
 import { VError } from 'verror'
@@ -9,9 +9,9 @@ import { UmlClass} from './umlClass'
 
 const debug = require('debug')('sol2uml')
 
-export const parseUmlClassesFromFiles = async(fileOrFolders: string[], depthLimit:number = -1): Promise<UmlClass[]> => {
+export const parseUmlClassesFromFiles = async(filesOrFolders: string[], ignoreFilesOrFolders: string[], depthLimit:number = -1): Promise<UmlClass[]> => {
 
-    const files = await getSolidityFilesFromFolderOrFiles(fileOrFolders, depthLimit)
+    const files = await getSolidityFilesFromFolderOrFiles(filesOrFolders, ignoreFilesOrFolders, depthLimit)
 
     let umlClasses: UmlClass[] = []
 
@@ -28,19 +28,19 @@ export const parseUmlClassesFromFiles = async(fileOrFolders: string[], depthLimi
     return umlClasses
 }
 
-export async function getSolidityFilesFromFolderOrFiles(folderOrFilePaths: string[], depthLimit:number = -1): Promise<string[]> {
+export async function getSolidityFilesFromFolderOrFiles(folderOrFilePaths: string[], ignoreFilesOrFolders: string[], depthLimit:number = -1): Promise<string[]> {
 
     let files: string[] = []
 
     for (const folderOrFilePath of folderOrFilePaths) {
-        const result = await getSolidityFilesFromFolderOrFile(folderOrFilePath, depthLimit)
+        const result = await getSolidityFilesFromFolderOrFile(folderOrFilePath, ignoreFilesOrFolders, depthLimit)
         files = files.concat(result)
     }
 
     return files
 }
 
-export function getSolidityFilesFromFolderOrFile(folderOrFilePath: string, depthLimit:number = -1): Promise<string[]> {
+export function getSolidityFilesFromFolderOrFile(folderOrFilePath: string, ignoreFilesOrFolders: string[] = [], depthLimit:number = -1): Promise<string[]> {
 
     debug(`About to get Solidity files under ${folderOrFilePath}`)
 
@@ -52,8 +52,15 @@ export function getSolidityFilesFromFolderOrFile(folderOrFilePath: string, depth
 
                 const files: string[] = []
 
+                // filter out files or folders that are to be ignored
+                const filter = (file: string): boolean => {
+                    return !ignoreFilesOrFolders.includes(basename(file))
+                }
+
                 klaw(folderOrFilePath, {
                     depthLimit,
+                    filter,
+                    preserveSymlinks: true
                 })
                     .on('data', file => {
                         if (extname(file.path) === '.sol')

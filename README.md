@@ -40,18 +40,24 @@ Usage: sol2uml <fileFolderAddress> [options]
 Generates UML diagrams from Solidity source code.
 If no file, folder or address is passes as the first argument, the working folder is used.
 When a folder is used, all *.sol files are found in that folder and all sub folders.
-If an Ethereum address with a 0x prefix is passed, the verified source code from Etherscan will be used.
+A comma separated list of files and folders can also used. For example
+    sol2uml contracts,node_modules/openzeppelin-solidity
+
+If an Ethereum address with a 0x prefix is passed, the verified source code from Etherscan will be used. For example
+    sol2uml 0x79fEbF6B9F76853EDBcBc913e6aAE8232cFB9De9
 
 Options:
-  -b, --baseContractNames <value>  only output contracts connected to these comma separated base contract names
-  -f, --outputFormat <value>       output file format: svg, png, dot or all (default: "svg")
-  -o, --outputFileName <value>     output file name
-  -d, --depthLimit <depth>         number of sub folders that will be recursively searched for Solidity files. Default -1 is unlimited (default: -1)
-  -n, --network <network>          mainnet, ropsten, kovan, rinkeby or goerli (default: "mainnet")
-  -k, --etherscanApiKey <key>      Etherscan API Key
-  -c, --clusterFolders             cluster contracts into source folders
-  -v, --verbose                    run with debugging statements
-  -h, --help                       output usage information
+  -b, --baseContractNames <value>              only output contracts connected to these comma separated base contract names
+  -f, --outputFormat <value>                   output file format: svg, png, dot or all (default: "svg")
+  -o, --outputFileName <value>                 output file name
+  -d, --depthLimit <depth>                     number of sub folders that will be recursively searched for Solidity files. Default -1 is unlimited (default: -1)
+  -i, --ignoreFilesOrFolders <filesOrFolders>  comma separated list of files or folders to ignore
+  -n, --network <network>                      mainnet, ropsten, kovan, rinkeby or goerli (default: "mainnet")
+  -k, --etherscanApiKey <key>                  Etherscan API Key
+  -c, --clusterFolders                         cluster contracts into source folders
+  -v, --verbose                                run with debugging statements
+  -h, --help                                   output usage information
+
 ```
 
 To generate a diagram of all contracts under the contracts folder and its sub folders
@@ -79,9 +85,14 @@ To generate a diagram of all contracts in a single Solidity file, the output fil
 sol2uml path/to/contracts/root/folder/solidity/file.sol -f png -o ./someFile.png
 ```
 
-To generate diagrams of all Solidity files under some root folder.  The output will be `contracts.svg` and `contracts.png` files in the working folder.
+To generate a diagram of all Solidity files under the `contracts` and `node_modules/openzeppelin-solidity` folders.  The output will be `contracts.svg` and `contracts.png` files in the working folder.
 ```bash
-sol2uml ./contracts -f all -v
+sol2uml ./contracts,node_modules/openzeppelin-solidity -f all -v
+```
+
+To generate a diagram of all Solidity files under the working folder ignoring and files under the `solparse`, `@solidity-parser` and `ethlint` folders, which will be under the `node_modules` folder.
+```bash
+sol2uml -i solparse,@solidity-parser,ethlint
 ```
 
 ## Application Programming Interface (API)

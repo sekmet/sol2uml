@@ -35,7 +35,7 @@ contract VirtualB {
     }
 }
 
-contract VirtualOverdide is VirtualA, VirtualB {
+contract VirtualOverride is VirtualA, VirtualB {
     function funA() public override(VirtualB,VirtualA) {
         emit MyEvent("from B");
         super.funA();
@@ -44,11 +44,11 @@ contract VirtualOverdide is VirtualA, VirtualB {
 
 contract ArrayFunctions {
     uint[] public myUintArray;
-    
+
     function add(uint _num) public {
         myUintArray.push(_num);
     }
-    
+
     function removeElement() public {
         myUintArray.pop();
     }
@@ -56,21 +56,21 @@ contract ArrayFunctions {
 
 contract FallbackReceive {
     event SomeEvent(address _addr, uint _amount);
-    
+
     /**
      * Will be called when (fallback) is used in Remix
      */
     receive() external payable {
         emit SomeEvent(msg.sender, msg.value);
     }
-    
+
     /**
      * Will be called when msg.data is not empty or when receive() doesn't exist
-     * 
+     *
      * If not payable => revert-style error on msg.value not empty
      * */
     fallback () external {
-        
+
     }
 }
 
@@ -78,11 +78,11 @@ contract TryBaseBase {
     function funARequireFailure() public pure {
         require(false, "This is an error String");
     }
-    
+
     function funBRevertFailure() public pure {
         revert("Error from Contract A");
     }
-    
+
     function funCAssertFailure() public pure {
         assert(false);
     }
@@ -90,14 +90,14 @@ contract TryBaseBase {
 
 contract TryCatch {
     TryBaseBase instA;
-    
+
     event Error(string _reason);
     event LowLevelError(bytes _reason);
-    
+
     constructor() public {
         instA = new TryBaseBase();
     }
-    
+
     function testRequireTryCatch() public returns(bool) {
         try instA.funCAssertFailure() {
             return true;

@@ -150,7 +150,7 @@ Heads/Tails:
 
 # Contribution
 
-To build the test contracts in this repository
+To build the test contracts in this repository, run the following. This assumes you have the [Solidity compiler](https://docs.soliditylang.org/en/v0.7.5/installing-solidity.html) `solc` installed on your machine.
 
 `npm run buildSol`
 

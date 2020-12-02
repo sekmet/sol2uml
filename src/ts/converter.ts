@@ -1,9 +1,14 @@
-import {dotUmlClass} from "./dotGenerator"
+import { dotUmlClass } from './dotGenerator'
 
 const debug = require('debug')('sol2uml')
 
 import { lstatSync, writeFile } from 'fs'
-import { Association, ClassStereotype, ReferenceType, UmlClass} from './umlClass'
+import {
+    Association,
+    ClassStereotype,
+    ReferenceType,
+    UmlClass,
+} from './umlClass'
 import { VError } from 'verror'
 
 const path = require('path')
@@ -12,20 +17,22 @@ const svg_to_png = require('svg-to-png')
 
 export type OutputFormats = 'svg' | 'png' | 'dot' | 'all'
 
-export const generateFilesFromUmlClasses = async(
+export const generateFilesFromUmlClasses = async (
     umlClasses: UmlClass[],
     outputBaseName: string,
     outputFormat: OutputFormats = 'svg',
     outputFilename?: string,
-    clusterFolders: boolean = false): Promise<void> => {
-
+    clusterFolders: boolean = false
+): Promise<void> => {
     const dot = convertUmlClasses2Dot(umlClasses, clusterFolders)
 
     if (outputFormat === 'dot' || outputFormat === 'all') {
         writeDot(dot, outputFilename)
 
         // No need to continue if only generating a dot file
-        if (outputFormat === 'dot') { return }
+        if (outputFormat === 'dot') {
+            return
+        }
     }
 
     if (!outputFilename) {
@@ -35,12 +42,11 @@ export const generateFilesFromUmlClasses = async(
         // if outputBaseName is a folder
         try {
             const folderOrFile = lstatSync(outputBaseName)
-            if(folderOrFile.isDirectory() ) {
+            if (folderOrFile.isDirectory()) {
                 const parsedDir = path.parse(process.cwd())
                 outputBaseName = path.join(process.cwd(), parsedDir.name)
             }
-        }
-        catch (err) {}  // we can ignore errors as it just means outputBaseName is not a folder
+        } catch (err) {} // we can ignore errors as it just means outputBaseName is not a folder
 
         outputFilename = outputBaseName + '.' + outputExt
     }
@@ -55,17 +61,19 @@ export const generateFilesFromUmlClasses = async(
     }
 }
 
-export const convertUmlClassesToSvg = async(
-  umlClasses: UmlClass[],
-  clusterFolders: boolean = false): Promise<string> => {
-
+export const convertUmlClassesToSvg = async (
+    umlClasses: UmlClass[],
+    clusterFolders: boolean = false
+): Promise<string> => {
     const dot = convertUmlClasses2Dot(umlClasses, clusterFolders)
 
     return convertDot2Svg(dot)
 }
 
-export function convertUmlClasses2Dot(umlClasses: UmlClass[], clusterFolders: boolean = false): string {
-
+export function convertUmlClasses2Dot(
+    umlClasses: UmlClass[],
+    clusterFolders: boolean = false
+): string {
     let dotString: string = `
 digraph UmlClassDiagram {
 rankdir=BT
@@ -74,7 +82,9 @@ arrowhead=open
 node [shape=record, style=filled, fillcolor=gray95]`
 
     // Sort UML Classes by folder of source file
-    const umlClassesSortedBySourceFiles = sortUmlClassesBySourceFolder(umlClasses)
+    const umlClassesSortedBySourceFiles = sortUmlClassesBySourceFolder(
+        umlClasses
+    )
 
     let sourceFolder = ''
     for (const umlClass of umlClassesSortedBySourceFiles) {
@@ -130,7 +140,7 @@ function sortUmlClassesBySourceFolder(umlClasses: UmlClass[]): UmlClass[] {
 
 export function addAssociationsToDot(umlClasses: UmlClass[]): string {
     let dotString: string = ''
-    let nameToIdMap: {[className: string]: UmlClass} = {}
+    let nameToIdMap: { [className: string]: UmlClass } = {}
 
     for (const umlClass of umlClasses) {
         nameToIdMap[umlClass.name] = umlClass
@@ -143,7 +153,11 @@ export function addAssociationsToDot(umlClasses: UmlClass[]): string {
             // find the target class
             const targetUmlClass = nameToIdMap[association.targetUmlClassName]
             if (targetUmlClass) {
-                dotString += addAssociationToDot(sourceUmlClass, targetUmlClass, association)
+                dotString += addAssociationToDot(
+                    sourceUmlClass,
+                    targetUmlClass,
+                    association
+                )
             }
         }
     }
@@ -151,14 +165,18 @@ export function addAssociationsToDot(umlClasses: UmlClass[]): string {
     return dotString
 }
 
-function addAssociationToDot(sourceUmlClass: UmlClass, targetUmlClass: UmlClass, association: Association): string {
-
+function addAssociationToDot(
+    sourceUmlClass: UmlClass,
+    targetUmlClass: UmlClass,
+    association: Association
+): string {
     let dotString = `\n${sourceUmlClass.id} -> ${targetUmlClass.id} [`
 
-    if (association.referenceType == ReferenceType.Memory ||
-        association.realization &&
-        targetUmlClass.stereotype === ClassStereotype.Interface)
-    {
+    if (
+        association.referenceType == ReferenceType.Memory ||
+        (association.realization &&
+            targetUmlClass.stereotype === ClassStereotype.Interface)
+    ) {
         dotString += 'style=dashed, '
     }
 
@@ -166,8 +184,7 @@ function addAssociationToDot(sourceUmlClass: UmlClass, targetUmlClass: UmlClass,
         dotString += 'arrowhead=empty, arrowsize=3, '
         if (!targetUmlClass.stereotype) {
             dotString += 'weight=4, '
-        }
-        else {
+        } else {
             dotString += 'weight=3, '
         }
     }
@@ -176,13 +193,11 @@ function addAssociationToDot(sourceUmlClass: UmlClass, targetUmlClass: UmlClass,
 }
 
 export function convertDot2Svg(dot: string): any {
-
     debug(`About to convert dot to SVG`)
 
     try {
         return Viz(dot)
-    }
-    catch (err) {
+    } catch (err) {
         console.error(`Failed to convert dot to SVG. ${err.message}`)
         console.log(dot)
         throw new VError(err, `Failed to parse dot string`)
@@ -190,10 +205,9 @@ export function convertDot2Svg(dot: string): any {
 }
 
 export function writeDot(dot: string, dotFilename = 'classDiagram.dot') {
-
     debug(`About to write Dot file to ${dotFilename}`)
 
-    writeFile(dotFilename, dot, err => {
+    writeFile(dotFilename, dot, (err) => {
         if (err) {
             throw new VError(err, `Failed to write Dot file to ${dotFilename}`)
         } else {
@@ -202,24 +216,31 @@ export function writeDot(dot: string, dotFilename = 'classDiagram.dot') {
     })
 }
 
-export function writeSVG(svg: any, svgFilename = 'classDiagram.svg', outputFormats: OutputFormats = 'png'): Promise<void> {
-
+export function writeSVG(
+    svg: any,
+    svgFilename = 'classDiagram.svg',
+    outputFormats: OutputFormats = 'png'
+): Promise<void> {
     debug(`About to write SVN file to ${svgFilename}`)
 
     if (outputFormats === 'png') {
         const parsedFile = path.parse(svgFilename)
         if (!parsedFile.dir) {
             svgFilename = process.cwd() + '/' + parsedFile.name + '.svg'
-        }
-        else {
+        } else {
             svgFilename = parsedFile.dir + '/' + parsedFile.name + '.svg'
         }
     }
 
     return new Promise<void>((resolve, reject) => {
-        writeFile(svgFilename, svg, err => {
+        writeFile(svgFilename, svg, (err) => {
             if (err) {
-                reject(new VError(err, `Failed to write SVG file to ${svgFilename}`))
+                reject(
+                    new VError(
+                        err,
+                        `Failed to write SVG file to ${svgFilename}`
+                    )
+                )
             } else {
                 console.log(`Generated svg file ${svgFilename}`)
                 resolve()
@@ -229,21 +250,22 @@ export function writeSVG(svg: any, svgFilename = 'classDiagram.svg', outputForma
 }
 
 export async function writePng(svg: any, filename: string): Promise<void> {
-
     // get svg file name from png file name
     const parsedPngFile = path.parse(filename)
-    const pngDir = (parsedPngFile.dir === "")? '.' : path.resolve(parsedPngFile.dir)
+    const pngDir =
+        parsedPngFile.dir === '' ? '.' : path.resolve(parsedPngFile.dir)
     const svgFilename = pngDir + '/' + parsedPngFile.name + '.svg'
     const pngFilename = pngDir + '/' + parsedPngFile.name + '.png'
-
 
     debug(`About to convert svg file ${svgFilename} to png file ${pngFilename}`)
 
     try {
         await svg_to_png.convert(path.resolve(svgFilename), pngDir)
-    }
-    catch (err) {
-        throw new VError(err, `Failed to convert SVG file ${svgFilename} to PNG file ${pngFilename}`)
+    } catch (err) {
+        throw new VError(
+            err,
+            `Failed to convert SVG file ${svgFilename} to PNG file ${pngFilename}`
+        )
     }
 
     console.log(`Generated png file ${pngFilename}`)

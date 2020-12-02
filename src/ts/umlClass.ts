@@ -1,4 +1,3 @@
-
 export enum Visibility {
     None,
     Public,
@@ -26,21 +25,21 @@ export enum OperatorStereotype {
 
 export interface Parameter {
     // name is not required in return parameters or operator parameters
-    name?: string,
-    type: string,
+    name?: string
+    type: string
 }
 
 export interface Attribute {
-    visibility?: Visibility,
-    name: string,
-    type?: string,
+    visibility?: Visibility
+    name: string
+    type?: string
 }
 
 export interface Operator extends Attribute {
-    stereotype?: OperatorStereotype,
-    parameters?: Parameter[],
-    returnParameters?: Parameter[],
-    isPayable?: boolean,
+    stereotype?: OperatorStereotype
+    parameters?: Parameter[]
+    returnParameters?: Parameter[]
+    isPayable?: boolean
 }
 
 export enum ReferenceType {
@@ -49,24 +48,23 @@ export enum ReferenceType {
 }
 
 export interface Association {
-    referenceType: ReferenceType,
-    targetUmlClassName: string,
-    targetUmlClassStereotype?: ClassStereotype,
-    realization?: boolean,
+    referenceType: ReferenceType
+    targetUmlClassName: string
+    targetUmlClassStereotype?: ClassStereotype
+    realization?: boolean
 }
 
 export interface ClassProperties {
     name: string
     codeSource: string
     stereotype?: ClassStereotype
-    enums?: {[name: string]: string[]}
+    enums?: { [name: string]: string[] }
     attributes?: Attribute[]
     operators?: Operator[]
-    associations?: {[name: string]: Association}
+    associations?: { [name: string]: Association }
 }
 
 export class UmlClass implements ClassProperties {
-
     static idCounter = 0
 
     id: number
@@ -77,16 +75,18 @@ export class UmlClass implements ClassProperties {
     attributes: Attribute[] = []
     operators: Operator[] = []
 
-    enums: {[name: string]: string[]} = {}
-    structs: {[name: string]: Parameter[]} = {}
-    associations: {[name: string]: Association} = {}
+    enums: { [name: string]: string[] } = {}
+    structs: { [name: string]: Parameter[] } = {}
+    associations: { [name: string]: Association } = {}
 
     constructor(properties: ClassProperties) {
         if (!properties || !properties.name) {
-            throw TypeError(`Failed to instantiate UML Class with no name property`)
+            throw TypeError(
+                `Failed to instantiate UML Class with no name property`
+            )
         }
 
-        Object.assign(this, properties);
+        Object.assign(this, properties)
 
         // Generate a unique identifier for this UML Class
         this.id = UmlClass.idCounter++
@@ -94,7 +94,9 @@ export class UmlClass implements ClassProperties {
 
     addAssociation(association: Association) {
         if (!association || !association.targetUmlClassName) {
-            throw TypeError(`Failed to add association. targetUmlClassName was missing`)
+            throw TypeError(
+                `Failed to add association. targetUmlClassName was missing`
+            )
         }
 
         // Will not duplicate lines to the same class and stereotype
@@ -109,7 +111,8 @@ export class UmlClass implements ClassProperties {
         else {
             // If new attribute reference type is Storage
             if (association.referenceType === ReferenceType.Storage) {
-                this.associations[targetUmlClass].referenceType = ReferenceType.Storage
+                this.associations[targetUmlClass].referenceType =
+                    ReferenceType.Storage
             }
         }
     }

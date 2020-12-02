@@ -1,2 +1,2 @@
-import { UmlClass } from "./umlClass";
+import { UmlClass } from './umlClass';
 export declare const dotUmlClass: (umlClass: UmlClass) => string;

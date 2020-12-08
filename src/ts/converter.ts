@@ -84,29 +84,28 @@ arrowhead=open
 node [shape=record, style=filled, fillcolor=gray95]`
 
     // Sort UML Classes by folder of source file
-    const umlClassesSortedBySourceFiles = sortUmlClassesBySourceFolder(
-        umlClasses
-    )
+    const umlClassesSortedByCodePath = sortUmlClassesByCodePath(umlClasses)
 
-    let sourceFolder = ''
-    for (const umlClass of umlClassesSortedBySourceFiles) {
-        if (sourceFolder !== umlClass.codeSource) {
+    let currentCodeFolder = ''
+    for (const umlClass of umlClassesSortedByCodePath) {
+        const codeFolder = path.dirname(umlClass.codePath)
+        if (currentCodeFolder !== codeFolder) {
             // Need to close off the last subgraph if not the first
-            if (sourceFolder != '') {
+            if (currentCodeFolder != '') {
                 dotString += '\n}'
             }
 
             dotString += `
 subgraph ${getSubGraphName(clusterFolders)} {
-label="${umlClass.codeSource}"`
+label="${codeFolder}"`
 
-            sourceFolder = umlClass.codeSource
+            currentCodeFolder = codeFolder
         }
         dotString += dotUmlClass(umlClass, classOptions)
     }
 
     // Need to close off the last subgraph if not the first
-    if (sourceFolder != '') {
+    if (currentCodeFolder != '') {
         dotString += '\n}'
     }
 
@@ -128,12 +127,12 @@ function getSubGraphName(clusterFolders: boolean = false) {
     return ` graph_${subGraphCount++}`
 }
 
-function sortUmlClassesBySourceFolder(umlClasses: UmlClass[]): UmlClass[] {
+function sortUmlClassesByCodePath(umlClasses: UmlClass[]): UmlClass[] {
     return umlClasses.sort((a, b) => {
-        if (a.codeSource < b.codeSource) {
+        if (a.codePath < b.codePath) {
             return -1
         }
-        if (a.codeSource > b.codeSource) {
+        if (a.codePath > b.codePath) {
             return 1
         }
         return 0
@@ -142,18 +141,23 @@ function sortUmlClassesBySourceFolder(umlClasses: UmlClass[]): UmlClass[] {
 
 export function addAssociationsToDot(umlClasses: UmlClass[]): string {
     let dotString: string = ''
-    let nameToIdMap: { [className: string]: UmlClass } = {}
-
-    for (const umlClass of umlClasses) {
-        nameToIdMap[umlClass.name] = umlClass
-    }
 
     // for each class
     for (const sourceUmlClass of umlClasses) {
         // for each association in that class
         for (const association of Object.values(sourceUmlClass.associations)) {
-            // find the target class
-            const targetUmlClass = nameToIdMap[association.targetUmlClassName]
+            // find the target class with the same class name and
+            // codePath of the target in the importedPaths of the source class OR
+            // the codePath of the target is the same as the codePath pf the source class
+            const targetUmlClass = umlClasses.find((targetUmlClass) => {
+                return (
+                    targetUmlClass.name === association.targetUmlClassName &&
+                    (sourceUmlClass.importedPaths.includes(
+                        targetUmlClass.codePath
+                    ) ||
+                        sourceUmlClass.codePath === targetUmlClass.codePath)
+                )
+            })
             if (targetUmlClass) {
                 dotString += addAssociationToDot(
                     sourceUmlClass,

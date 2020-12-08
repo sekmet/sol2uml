@@ -56,7 +56,8 @@ export interface Association {
 
 export interface ClassProperties {
     name: string
-    codeSource: string
+    codePath: string
+    importedFileNames?: string[]
     stereotype?: ClassStereotype
     enums?: { [name: string]: string[] }
     attributes?: Attribute[]
@@ -69,7 +70,8 @@ export class UmlClass implements ClassProperties {
 
     id: number
     name: string
-    codeSource: string
+    codePath: string
+    importedPaths?: string[]
     stereotype?: ClassStereotype
 
     attributes: Attribute[] = []

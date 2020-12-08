@@ -13,14 +13,16 @@ import {
     UmlClass,
     Visibility,
 } from './umlClass'
+import { dirname, join } from 'path'
 
 const debug = require('debug')('sol2uml')
 
 export function convertNodeToUmlClass(
     node: ASTNode,
-    codeSource: string
+    codePath: string
 ): UmlClass[] {
     let umlClasses: UmlClass[] = []
+    const importedPaths: string[] = []
 
     if (node.type === 'SourceUnit') {
         node.children.forEach((childNode) => {
@@ -29,20 +31,25 @@ export function convertNodeToUmlClass(
 
                 let umlClass = new UmlClass({
                     name: childNode.name,
-                    codeSource: codeSource,
+                    codePath,
                 })
 
                 umlClass = parseContractDefinition(umlClass, childNode)
 
                 umlClasses.push(umlClass)
             } else if (childNode.type === 'ImportDirective') {
-                // TODO travers to parse imports
-                // importedContracts.push(contract)
+                const codeFolder = dirname(codePath)
+                const importPath = join(codeFolder, childNode.path)
+                importedPaths.push(importPath)
             }
         })
     } else {
         throw new Error(`AST node not of type SourceUnit`)
     }
+
+    umlClasses.forEach((umlClass) => {
+        umlClass.importedPaths = importedPaths
+    })
 
     return umlClasses
 }

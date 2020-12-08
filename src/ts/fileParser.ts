@@ -1,5 +1,5 @@
 import { lstatSync, readFileSync } from 'fs'
-import { basename, dirname, extname, relative } from 'path'
+import { basename, extname, relative } from 'path'
 import klaw from 'klaw'
 import { ASTNode, parse } from '@solidity-parser/parser'
 import { VError } from 'verror'
@@ -25,10 +25,9 @@ export const parseUmlClassesFromFiles = async (
     for (const file of files) {
         const node = await parseSolidityFile(file)
 
-        const sourceFolder = dirname(file)
-        const relativeSourceFolder = relative(process.cwd(), sourceFolder)
+        const relativePath = relative(process.cwd(), file)
 
-        const umlClass = convertNodeToUmlClass(node, relativeSourceFolder)
+        const umlClass = convertNodeToUmlClass(node, relativePath)
         umlClasses = umlClasses.concat(umlClass)
     }
 

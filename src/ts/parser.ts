@@ -280,8 +280,9 @@ function addAssociations(nodes: ASTNode[], umlClass: UmlClass): UmlClass {
                 umlClass = parseExpression(node.initialValue, umlClass)
                 break
             case 'ForStatement':
-                // @ts-ignore type of body is a Block and not a Statement
-                umlClass = addAssociations(node.body.statements, umlClass)
+                if ('statements' in node.body) {
+                    umlClass = addAssociations(node.body.statements, umlClass)
+                }
                 umlClass = parseExpression(node.conditionExpression, umlClass)
                 umlClass = parseExpression(
                     node.loopExpression.expression,
@@ -289,12 +290,14 @@ function addAssociations(nodes: ASTNode[], umlClass: UmlClass): UmlClass {
                 )
                 break
             case 'WhileStatement':
-                // @ts-ignore type of body is a Block and not a Statement
-                umlClass = addAssociations(node.body.statements, umlClass)
+                if ('statements' in node.body) {
+                    umlClass = addAssociations(node.body.statements, umlClass)
+                }
                 break
             case 'DoWhileStatement':
-                // @ts-ignore type of body is a Block and not a Statement
-                umlClass = addAssociations(node.body.statements, umlClass)
+                if ('statements' in node.body) {
+                    umlClass = addAssociations(node.body.statements, umlClass)
+                }
                 umlClass = parseExpression(node.condition, umlClass)
                 break
             case 'ReturnStatement':
@@ -302,37 +305,33 @@ function addAssociations(nodes: ASTNode[], umlClass: UmlClass): UmlClass {
                 umlClass = parseExpression(node.expression, umlClass)
                 break
             case 'IfStatement':
-                // @ts-ignore type ExpressionStatement can contain statements in a Block
-                if (node.trueBody?.statements) {
-                    umlClass = addAssociations(
-                        // @ts-ignore type ExpressionStatement can contain statements in a Block
-                        node.trueBody.statements,
-                        umlClass
-                    )
+                if (node.trueBody) {
+                    if ('statements' in node.trueBody) {
+                        umlClass = addAssociations(
+                            node.trueBody.statements,
+                            umlClass
+                        )
+                    }
+                    if ('expression' in node.trueBody) {
+                        umlClass = parseExpression(
+                            node.trueBody.expression,
+                            umlClass
+                        )
+                    }
                 }
-                // @ts-ignore type ExpressionStatement can contain an expression
-                if (node.trueBody?.expression) {
-                    umlClass = parseExpression(
-                        // @ts-ignore type ExpressionStatement can contain an expression
-                        node.trueBody.expression,
-                        umlClass
-                    )
-                }
-                // @ts-ignore type ExpressionStatement can contain statements in a Block
-                if (node.falseBody?.statements) {
-                    umlClass = addAssociations(
-                        // @ts-ignore type ExpressionStatement can contain statements in a Block
-                        node.falseBody.statements,
-                        umlClass
-                    )
-                }
-                // @ts-ignore type ExpressionStatement can contain an expression
-                if (node.falseBody?.expression) {
-                    umlClass = parseExpression(
-                        // @ts-ignore type ExpressionStatement can contain an expression
-                        node.falseBody.expression,
-                        umlClass
-                    )
+                if (node.falseBody) {
+                    if ('statements' in node.falseBody) {
+                        umlClass = addAssociations(
+                            node.falseBody.statements,
+                            umlClass
+                        )
+                    }
+                    if ('expression' in node.falseBody) {
+                        umlClass = parseExpression(
+                            node.falseBody.expression,
+                            umlClass
+                        )
+                    }
                 }
 
                 umlClass = parseExpression(node.condition, umlClass)

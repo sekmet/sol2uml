@@ -4,7 +4,7 @@ import {
     Expression,
     TypeName,
     VariableDeclaration,
-} from '@solidity-parser/parser'
+} from '@solidity-parser/parser/dist/ast-types'
 import {
     ClassStereotype,
     OperatorStereotype,
@@ -161,14 +161,11 @@ function parseContractDefinition(
                 umlClass.operators.push({
                     stereotype: OperatorStereotype.Modifier,
                     name: subNode.name,
-                    // @ts-ignore ModifierDefinition type missing parameters
                     parameters: parseParameters(subNode.parameters),
                 })
 
-                // @ts-ignore ModifierDefinition type is missing body
                 if (subNode.body && subNode.body.statements) {
                     // Recursively parse modifier statements for associations
-                    // @ts-ignore ModifierDefinition type is missing body
                     umlClass = addAssociations(
                         subNode.body.statements,
                         umlClass
@@ -307,7 +304,7 @@ function addAssociations(nodes: ASTNode[], umlClass: UmlClass): UmlClass {
                 // @ts-ignore type ExpressionStatement can contain statements in a Block
                 if (node.trueBody?.statements) {
                     umlClass = addAssociations(
-                        // @ts-ignore
+                        // @ts-ignore type ExpressionStatement can contain statements in a Block
                         node.trueBody.statements,
                         umlClass
                     )
@@ -320,12 +317,10 @@ function addAssociations(nodes: ASTNode[], umlClass: UmlClass): UmlClass {
                         umlClass
                     )
                 }
-
-                // @ts-ignore type Statement can be a Block
+                // @ts-ignore type ExpressionStatement can contain statements in a Block
                 if (node.falseBody?.statements) {
-                    // @ts-ignore type ExpressionStatement can contain an expression
                     umlClass = addAssociations(
-                        // @ts-ignore
+                        // @ts-ignore type ExpressionStatement can contain statements in a Block
                         node.falseBody.statements,
                         umlClass
                     )
@@ -378,15 +373,12 @@ function parseExpression(expression: Expression, umlClass: UmlClass): UmlClass {
             referenceType: ReferenceType.Memory,
             targetUmlClassName: expression.name,
         })
-    }
-    // @ts-ignore
-    else if (expression.type === 'NewExpression') {
-        // @ts-ignore
+    } else if (expression.type === 'NewExpression') {
         umlClass = addAssociations([expression.typeName], umlClass)
-    }
-    // @ts-ignore IDEX 0x2a0c0DBEcC7E4D658f48E01e3fA353F44050c208 has this
-    else if (expression.type === 'UnaryOperation' && expression.subExpression) {
-        // @ts-ignore
+    } else if (
+        expression.type === 'UnaryOperation' &&
+        expression.subExpression
+    ) {
         umlClass = parseExpression(expression.subExpression, umlClass)
     }
 

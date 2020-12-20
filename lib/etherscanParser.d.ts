@@ -1,4 +1,4 @@
-import { ASTNode } from '@solidity-parser/parser';
+import { ASTNode } from '@solidity-parser/parser/dist/ast-types';
 import { UmlClass } from './umlClass';
 declare const networks: readonly ["mainnet", "ropsten", "kovan", "rinkeby", "goerli"];
 declare type Network = typeof networks[number];

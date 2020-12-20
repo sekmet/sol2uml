@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { ASTNode, parse } from '@solidity-parser/parser'
+import { ASTNode } from '@solidity-parser/parser/dist/ast-types'
+import { parse } from '@solidity-parser/parser'
 import { VError } from 'verror'
 
 import { convertNodeToUmlClass } from './parser'

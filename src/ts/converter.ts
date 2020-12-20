@@ -1,19 +1,18 @@
-import { ClassOptions, dotUmlClass } from './dotGenerator'
-
-const debug = require('debug')('sol2uml')
-
 import { lstatSync, writeFile } from 'fs'
+const path = require('path')
+const svg_to_png = require('svg-to-png')
+import { VError } from 'verror'
+const Viz = require('viz.js')
+
+import { ClassOptions, dotUmlClass } from './dotGenerator'
 import {
     Association,
     ClassStereotype,
     ReferenceType,
     UmlClass,
 } from './umlClass'
-import { VError } from 'verror'
 
-const path = require('path')
-const Viz = require('viz.js')
-const svg_to_png = require('svg-to-png')
+const debug = require('debug')('sol2uml')
 
 export type OutputFormats = 'svg' | 'png' | 'dot' | 'all'
 
@@ -109,7 +108,7 @@ label="${codeFolder}"`
         dotString += '\n}'
     }
 
-    dotString += addAssociationsToDot(umlClasses)
+    dotString += addAssociationsToDot(umlClasses, classOptions)
 
     // Need to close off the last the digraph
     dotString += '\n}'
@@ -139,7 +138,10 @@ function sortUmlClassesByCodePath(umlClasses: UmlClass[]): UmlClass[] {
     })
 }
 
-export function addAssociationsToDot(umlClasses: UmlClass[]): string {
+export function addAssociationsToDot(
+    umlClasses: UmlClass[],
+    classOptions: ClassOptions = {}
+): string {
     let dotString: string = ''
 
     // for each class
@@ -162,7 +164,8 @@ export function addAssociationsToDot(umlClasses: UmlClass[]): string {
                 dotString += addAssociationToDot(
                     sourceUmlClass,
                     targetUmlClass,
-                    association
+                    association,
+                    classOptions
                 )
             }
         }
@@ -174,8 +177,18 @@ export function addAssociationsToDot(umlClasses: UmlClass[]): string {
 function addAssociationToDot(
     sourceUmlClass: UmlClass,
     targetUmlClass: UmlClass,
-    association: Association
+    association: Association,
+    classOptions: ClassOptions = {}
 ): string {
+    // do not include library or interface associations if hidden
+    if (
+        (classOptions.hideLibraries &&
+            targetUmlClass.stereotype === ClassStereotype.Library) ||
+        (classOptions.hideInterfaces &&
+            targetUmlClass.stereotype === ClassStereotype.Interface)
+    ) {
+        return ''
+    }
     let dotString = `\n${sourceUmlClass.id} -> ${targetUmlClass.id} [`
 
     if (

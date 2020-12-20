@@ -57,6 +57,8 @@ Options:
   -p, --hideOperators                          hide class and interface operators/functions
   -e, --hideEnums                              hide enum types
   -s, --hideStructs                            hide data structures
+  -l, --hideLibraries                          hide libraries
+  -t, --hideInterfaces                         hide interfaces
   -k, --etherscanApiKey <key>                  Etherscan API Key
   -c, --clusterFolders                         cluster contracts into source folders
   -v, --verbose                                run with debugging statements

@@ -5,6 +5,8 @@ import {
     TypeName,
     VariableDeclaration,
 } from '@solidity-parser/parser/dist/ast-types'
+import { dirname, join } from 'path'
+
 import {
     ClassStereotype,
     OperatorStereotype,
@@ -13,7 +15,6 @@ import {
     UmlClass,
     Visibility,
 } from './umlClass'
-import { dirname, join } from 'path'
 
 const debug = require('debug')('sol2uml')
 

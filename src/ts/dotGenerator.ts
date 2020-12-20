@@ -14,12 +14,23 @@ export interface ClassOptions {
     hideOperators?: boolean
     hideStructs?: boolean
     hideEnums?: boolean
+    hideLibraries?: boolean
+    hideInterfaces?: boolean
 }
 
 export const dotUmlClass = (
     umlClass: UmlClass,
     options: ClassOptions = {}
 ): string => {
+    // do not include library or interface classes if hidden
+    if (
+        (options.hideLibraries &&
+            umlClass.stereotype === ClassStereotype.Library) ||
+        (options.hideInterfaces &&
+            umlClass.stereotype === ClassStereotype.Interface)
+    ) {
+        return ''
+    }
     let dotString = `\n${umlClass.id} [label="{${dotClassTitle(umlClass)}`
 
     // Add attributes

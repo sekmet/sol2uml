@@ -55,6 +55,8 @@ If an Ethereum address with a 0x prefix is passed, the verified source code from
     )
     .option('-e, --hideEnums', 'hide enum types')
     .option('-s, --hideStructs ', 'hide data structures')
+    .option('-l, --hideLibraries ', 'hide libraries')
+    .option('-t, --hideInterfaces ', 'hide interfaces')
     .option('-k, --etherscanApiKey <key>', 'Etherscan API Key')
     .option('-c, --clusterFolders', 'cluster contracts into source folders')
     .option('-v, --verbose', 'run with debugging statements')
@@ -129,6 +131,8 @@ async function sol2uml() {
             hideOperators: program.hideOperators,
             hideEnums: program.hideEnums,
             hideStructs: program.hideStructs,
+            hideLibraries: program.hideLibraries,
+            hideInterfaces: program.hideInterfaces,
         }
     ).then(() => {
         debug(`Finished`)

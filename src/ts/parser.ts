@@ -304,20 +304,37 @@ function addAssociations(nodes: ASTNode[], umlClass: UmlClass): UmlClass {
                 umlClass = parseExpression(node.expression, umlClass)
                 break
             case 'IfStatement':
-                // @ts-ignore type Statement can be a Block
-                if (node.trueBody && node.trueBody.statements) {
+                // @ts-ignore type ExpressionStatement can contain statements in a Block
+                if (node.trueBody?.statements) {
                     umlClass = addAssociations(
                         // @ts-ignore
                         node.trueBody.statements,
                         umlClass
                     )
                 }
+                // @ts-ignore type ExpressionStatement can contain an expression
+                if (node.trueBody?.expression) {
+                    umlClass = parseExpression(
+                        // @ts-ignore type ExpressionStatement can contain an expression
+                        node.trueBody.expression,
+                        umlClass
+                    )
+                }
 
                 // @ts-ignore type Statement can be a Block
-                if (node.falseBody && node.falseBody.statements) {
+                if (node.falseBody?.statements) {
+                    // @ts-ignore type ExpressionStatement can contain an expression
                     umlClass = addAssociations(
                         // @ts-ignore
                         node.falseBody.statements,
+                        umlClass
+                    )
+                }
+                // @ts-ignore type ExpressionStatement can contain an expression
+                if (node.falseBody?.expression) {
+                    umlClass = parseExpression(
+                        // @ts-ignore type ExpressionStatement can contain an expression
+                        node.falseBody.expression,
                         umlClass
                     )
                 }

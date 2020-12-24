@@ -5,7 +5,7 @@ import {
     TypeName,
     VariableDeclaration,
 } from '@solidity-parser/parser/dist/ast-types'
-import { dirname, join } from 'path'
+import * as path from 'path'
 
 import {
     ClassStereotype,
@@ -20,7 +20,7 @@ const debug = require('debug')('sol2uml')
 
 export function convertNodeToUmlClass(
     node: ASTNode,
-    codePath: string
+    relativePath: string
 ): UmlClass[] {
     let umlClasses: UmlClass[] = []
     const importedPaths: string[] = []
@@ -32,16 +32,25 @@ export function convertNodeToUmlClass(
 
                 let umlClass = new UmlClass({
                     name: childNode.name,
-                    codePath,
+                    absolutePath: path.resolve(relativePath), // resolve the absolute path
+                    relativePath,
                 })
 
                 umlClass = parseContractDefinition(umlClass, childNode)
 
                 umlClasses.push(umlClass)
             } else if (childNode.type === 'ImportDirective') {
-                const codeFolder = dirname(codePath)
-                const importPath = join(codeFolder, childNode.path)
-                importedPaths.push(importPath)
+                try {
+                    const codeFolder = path.dirname(relativePath)
+                    const importPath = require.resolve(childNode.path, {
+                        paths: [codeFolder],
+                    })
+                    importedPaths.push(importPath)
+                } catch (err) {
+                    debug(
+                        `Failed to resolve import ${childNode.path} from file ${relativePath}`
+                    )
+                }
             }
         })
     } else {

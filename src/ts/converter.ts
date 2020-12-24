@@ -87,7 +87,7 @@ node [shape=record, style=filled, fillcolor=gray95]`
 
     let currentCodeFolder = ''
     for (const umlClass of umlClassesSortedByCodePath) {
-        const codeFolder = path.dirname(umlClass.codePath)
+        const codeFolder = path.dirname(umlClass.relativePath)
         if (currentCodeFolder !== codeFolder) {
             // Need to close off the last subgraph if not the first
             if (currentCodeFolder != '') {
@@ -128,10 +128,10 @@ function getSubGraphName(clusterFolders: boolean = false) {
 
 function sortUmlClassesByCodePath(umlClasses: UmlClass[]): UmlClass[] {
     return umlClasses.sort((a, b) => {
-        if (a.codePath < b.codePath) {
+        if (a.relativePath < b.relativePath) {
             return -1
         }
-        if (a.codePath > b.codePath) {
+        if (a.relativePath > b.relativePath) {
             return 1
         }
         return 0
@@ -155,9 +155,10 @@ export function addAssociationsToDot(
                 return (
                     targetUmlClass.name === association.targetUmlClassName &&
                     (sourceUmlClass.importedPaths.includes(
-                        targetUmlClass.codePath
+                        targetUmlClass.absolutePath
                     ) ||
-                        sourceUmlClass.codePath === targetUmlClass.codePath)
+                        sourceUmlClass.absolutePath ===
+                            targetUmlClass.absolutePath)
                 )
             })
             if (targetUmlClass) {

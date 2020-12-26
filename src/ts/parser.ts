@@ -20,7 +20,8 @@ const debug = require('debug')('sol2uml')
 
 export function convertNodeToUmlClass(
     node: ASTNode,
-    relativePath: string
+    relativePath: string,
+    filesystem: boolean = false
 ): UmlClass[] {
     let umlClasses: UmlClass[] = []
     const importedPaths: string[] = []
@@ -32,7 +33,9 @@ export function convertNodeToUmlClass(
 
                 let umlClass = new UmlClass({
                     name: childNode.name,
-                    absolutePath: path.resolve(relativePath), // resolve the absolute path
+                    absolutePath: filesystem
+                        ? path.resolve(relativePath) // resolve the absolute path
+                        : relativePath, // from Etherscan so don't resolve
                     relativePath,
                 })
 
@@ -40,16 +43,23 @@ export function convertNodeToUmlClass(
 
                 umlClasses.push(umlClass)
             } else if (childNode.type === 'ImportDirective') {
-                try {
-                    const codeFolder = path.dirname(relativePath)
-                    const importPath = require.resolve(childNode.path, {
-                        paths: [codeFolder],
-                    })
+                const codeFolder = path.dirname(relativePath)
+                if (filesystem) {
+                    // resolve the imported file from the folder sol2uml was run against
+                    try {
+                        const importPath = require.resolve(childNode.path, {
+                            paths: [codeFolder],
+                        })
+                        importedPaths.push(importPath)
+                    } catch (err) {
+                        debug(
+                            `Failed to resolve import ${childNode.path} from file ${relativePath}`
+                        )
+                    }
+                } else {
+                    // this has come from Etherscan
+                    const importPath = path.join(codeFolder, childNode.path)
                     importedPaths.push(importPath)
-                } catch (err) {
-                    debug(
-                        `Failed to resolve import ${childNode.path} from file ${relativePath}`
-                    )
                 }
             }
         })

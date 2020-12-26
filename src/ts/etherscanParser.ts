@@ -38,8 +38,8 @@ export class EtherscanParser {
         let umlClasses: UmlClass[] = []
 
         for (const sourceFile of sourceFiles) {
-            const node = await this.parseSourceCode(sourceFile)
-            const umlClass = convertNodeToUmlClass(node, contractAddress)
+            const node = await this.parseSourceCode(sourceFile.code)
+            const umlClass = convertNodeToUmlClass(node, sourceFile.filename)
             umlClasses = umlClasses.concat(umlClass)
         }
 
@@ -68,7 +68,9 @@ export class EtherscanParser {
      * Calls Etherscan to get the verified source code for the specified contract address
      * @param contractAddress Ethereum contract address with a 0x prefix
      */
-    async getSourceCode(contractAddress: string): Promise<string[]> {
+    async getSourceCode(
+        contractAddress: string
+    ): Promise<{ code: string; filename: string }[]> {
         const description = `get verified source code for address ${contractAddress} from Etherscan API.`
 
         try {
@@ -89,14 +91,54 @@ export class EtherscanParser {
                 )
             }
 
-            return response.data.result.map((sc: any) => {
-                if (!sc.SourceCode) {
+            const results = response.data.result.map((result: any) => {
+                if (!result.SourceCode) {
                     throw new Error(
                         `Failed to ${description}. Most likely the contract has not been verified on Etherscan.`
                     )
                 }
-                return sc.SourceCode
+                // if multiple Solidity source files
+                // I think this is an Etherscan bug where the SourceCode field is encodes in two curly brackets. eg {{}}
+                if (result.SourceCode[0] === '{') {
+                    // remove first { and last } from the SourceCode string so it can be JSON parsed
+                    const parableResultString = result.SourceCode.slice(1, -1)
+                    try {
+                        const sourceCodeObject = JSON.parse(parableResultString)
+                        const sourceFiles = Object.entries(
+                            sourceCodeObject.sources
+                        )
+                        return sourceFiles.map(
+                            ([filename, code]: [
+                                string,
+                                { content: string }
+                            ]) => ({
+                                code: code.content,
+                                filename,
+                            })
+                        )
+                    } catch (err) {
+                        throw new VError(
+                            `Failed to parse Solidity source code from Etherscan's SourceCode. ${result.SourceCode}`
+                        )
+                    }
+                }
+                // if multiple Solidity source files with no Etherscan bug in the SourceCode field
+                if (result?.SourceCode?.sources) {
+                    const sourceFiles = Object.values(result.SourceCode.sources)
+                    return sourceFiles.map(
+                        ([filename, code]: [string, { content: string }]) => ({
+                            code: code.content,
+                            filename,
+                        })
+                    )
+                }
+                // Solidity source code was not uploaded into multiple files so is just in the SourceCode field
+                return {
+                    code: result.SourceCode,
+                    filename: contractAddress,
+                }
             })
+            return results.flat(1)
         } catch (err) {
             if (!err.response) {
                 throw new Error(`Failed to ${description}. No HTTP response.`)

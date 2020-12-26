@@ -23,6 +23,9 @@ export declare class EtherscanParser {
      * Calls Etherscan to get the verified source code for the specified contract address
      * @param contractAddress Ethereum contract address with a 0x prefix
      */
-    getSourceCode(contractAddress: string): Promise<string[]>;
+    getSourceCode(contractAddress: string): Promise<{
+        code: string;
+        filename: string;
+    }[]>;
 }
 export {};

@@ -3,7 +3,7 @@
     "composite": true,
 
     "esModuleInterop": true,
-    "lib": [ "es2015", "es5", "es6", "dom" ],
+    "lib": [ "esnext", "dom" ],
     "module": "commonjs",
     "target": "ES2018",
     "moduleResolution": "node",

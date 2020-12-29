@@ -184,7 +184,8 @@ function addAssociationToDot(
     // do not include library or interface associations if hidden
     if (
         (classOptions.hideLibraries &&
-            targetUmlClass.stereotype === ClassStereotype.Library) ||
+            (sourceUmlClass.stereotype === ClassStereotype.Library ||
+                targetUmlClass.stereotype === ClassStereotype.Library)) ||
         (classOptions.hideInterfaces &&
             targetUmlClass.stereotype === ClassStereotype.Interface)
     ) {

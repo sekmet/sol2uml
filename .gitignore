@@ -8,3 +8,4 @@ logs
 *.png
 *.dot
 testDiagrams
+converterTest.svg

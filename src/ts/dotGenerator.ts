@@ -60,20 +60,20 @@ const dotClassTitle = (umlClass: UmlClass): string => {
     let stereoName: string = ''
     switch (umlClass.stereotype) {
         case ClassStereotype.Abstract:
-            stereoName = 'Abstract'
+            stereoName = '𝐀𝐛𝐬𝐭𝐫𝐚𝐜𝐭'
             break
         case ClassStereotype.Interface:
-            stereoName = 'Interface'
+            stereoName = '𝐈𝐧𝐭𝐞𝐫𝐟𝐚𝐜𝐞'
             break
         case ClassStereotype.Library:
-            stereoName = 'Library'
+            stereoName = '𝐋𝐢𝐛𝐫𝐚𝐫𝐲'
             break
         default:
             // Contract or undefined stereotype will just return the UmlClass name
             return umlClass.name
     }
 
-    return `\\<\\<${stereoName}\\>\\>\\n${umlClass.name}`
+    return `${stereoName} ${umlClass.name}`
 }
 
 const dotAttributeVisibilities = (umlClass: UmlClass): string => {
@@ -221,21 +221,21 @@ const dotOperatorStereotype = (
 
     switch (operatorStereotype) {
         case OperatorStereotype.Event:
-            dotString += '\\<\\<event\\>\\>'
+            dotString += '𝙚𝙫𝙚𝙣𝙩'
             break
         case OperatorStereotype.Fallback:
-            dotString += '\\<\\<fallback\\>\\>'
+            dotString += '𝙛𝙖𝙡𝙡𝙗𝙖𝙘𝙠'
             break
         case OperatorStereotype.Modifier:
-            dotString += '\\<\\<modifier\\>\\>'
+            dotString += '𝙢𝙤𝙙𝙞𝙛𝙞𝙚𝙧'
             break
         case OperatorStereotype.Abstract:
             if (umlClass.stereotype === ClassStereotype.Abstract) {
-                dotString += '\\<\\<abstract\\>\\>'
+                dotString += '𝙖𝙗𝙨𝙩𝙧𝙖𝙘𝙩'
             }
             break
         case OperatorStereotype.Payable:
-            dotString += '\\<\\<payable\\>\\>'
+            dotString += '𝙥𝙖𝙮𝙖𝙗𝙡𝙚'
             break
         default:
             break

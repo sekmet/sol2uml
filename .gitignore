@@ -9,3 +9,4 @@ logs
 *.dot
 testDiagrams
 converterTest.svg
+sol2uml.svg
